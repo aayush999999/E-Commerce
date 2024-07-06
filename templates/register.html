@@ -1,0 +1,54 @@
+{% extends "navbar.html" %}
+
+{% block body %}
+
+{% comment %} &nbsp;&nbsp;<a href="/"><b>HOME</b></a> {% endcomment %}
+
+<div class="container mt-5" align="center">
+    <form class="col-6 mx-auto card p-3 shadow-lg mb-3" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+        <div class="form-group">
+          <h1>REGISTER</h1>
+          <hr>
+            {% if messages %}
+            {{ message.tags }}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% comment %} <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %} {% endcomment %}
+          
+            <div class="mb-3">
+                <label for="exampleInputEmail" class="form-label">First Name</label>
+                <input type="text" class="form-control" name="first_name" id="exampleInputEmail">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputEmail" class="form-label">Last Name</label>
+                <input type="text" class="form-control" name="last_name" id="exampleInputEmail">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputEmail" class="form-label">Username</label>
+                <input type="text" class="form-control" name="username" id="exampleInputEmail">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" id="exampleInputPassword">
+            </div>
+            
+            <p>
+                Already have account <a href="login">Login Here</a>
+            </p>
+
+            <button type="submit" class="btn btn-primary">Submit</button>    
+          
+      </form>
+</div>
+
+{% endblock %}

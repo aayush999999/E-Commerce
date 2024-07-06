@@ -1,0 +1,169 @@
+{% extends "navbar.html" %}
+{% load static %}
+{% block title %}SEARCH{% endblock title %}
+
+{% block body %}
+<h2>Search results : </h2>
+{% if item|length < 1 %}
+<p>No search results</p>
+
+ Your search - <i><b>{{query}}</b></i> - did not match any <b>Items Description</b>.
+  Suggestions: <br>
+
+  <ul>
+    <li>Make sure that all words are spelled correctly.</li>
+    <li>Try more general keywords.</li>
+   {% comment %} <li> Try fewer keywords.</li> {% endcomment %}
+   <li> Try different keywords.</li>
+    
+  </ul>
+
+{% endif %}
+
+<table class="table">
+    <thead class="thead-default">
+        <tr>
+            <th>Item Id</th>
+            <th>Image</th>
+            <th>Item Group</th>
+            <th>Item Description</th>
+            <th>Stock Quantity</th>
+            <th>Item Rate</th>
+            {% comment %} <th>Action</th> {% endcomment %}
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td></td>
+            <td></td>
+            {% comment %} <td><form method='get' action='/search' class="form-inline my-2 my-lg-0">{% csrf_token %}
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="search" id="search" >
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>&nbsp;
+              </form></td> {% endcomment %}
+        </tr>
+    {% for i in item %}
+    <tr>
+        <td>{{i.id}}</td>
+        <td><img src="/media/{{i.image}}" width="100" height="100" ></td>
+        <td>{{i.item_group}}</td>
+        
+        <td><h5 class="card-title" id="nameitem{{i.id}}">{{i.item_desc}}</h5></td>
+        <td>{{i.stock_qty}}</td>
+        <td><span id="priceitem{{i.id}}">{{i.item_rate}}</span></td>
+        {% comment %} <td><span id="divitem{{i.id}}" class="divit">
+            <button id="item{{i.id}}" class="btn btn-primary cart">Add to Cart</button>
+            </span></td> {% endcomment %}
+    </tr>
+{%endfor%}
+
+
+{% endblock body %}
+
+{% block js %} 
+ 
+<script>
+  
+
+  {% comment %} console.log('working'); {% endcomment %}
+// Find out the cart items from localStorage
+if (localStorage.getItem('cart') == null) {
+  var cart = {};
+} else {
+  cart = JSON.parse(localStorage.getItem('cart'));
+  updateCart(cart); // After refresh without press 'add_to_cart' to show +_- button if item already in cart.
+}
+
+
+// If the add to cart button is clicked, add/increment the item
+{% comment %} $('.cart').click(function() { {% endcomment %}
+{% comment %} $('.divit').on('click', 'button.cart', function(){
+  var idstr = this.id.toString();
+  if (cart[idstr] != undefined) {
+    qty = cart[idstr][0] + 1;
+  } else {
+    qty = 1;
+    name = document.getElementById('name' + idstr).innerHTML;
+    price = document.getElementById('price' + idstr).innerHTML;
+    cart[idstr] = [qty , name, parseInt(price)];
+  }
+  console.log(cart);
+  updateCart(cart);
+  //localStorage.setItem('cart', JSON.stringify(cart));
+}); {% endcomment %}
+
+
+//Add Popover to cart
+$('#popcart').popover();
+updatePopver(cart);
+
+function updatePopver(cart){
+  //console.log('We are inside updatePopver');
+  var popStr ="";
+  popStr = popStr + "<h5>Cart for your items in my shopping cart</h5><div class='mx-2 my-2'>";
+  var i = 1;
+  
+  for (var item in cart){
+    popStr = popStr + "<br><b>" + i  + ")</b> ";
+    popStr = popStr + document.getElementById('name' + item).innerHTML.slice(0, 15) + " ...<b>Qty:</b>   " + cart[item][0] + "   <b>Price:</b>" + cart[item][2] + '<br>' + " <b>Total:</b> " + cart[item][2]*cart[item][0] ;
+    i = i + 1;
+  }
+  popStr = popStr +"</div>"+" <a href='checkout'><button class='btn btn-primary' id='checkout'>Checkout</button></a> <button class='btn btn-primary' onclick='clearCart()' id='clearCart'>Clear Cart</button>"
+  //console.log(popStr);
+  document.getElementById('popcart').setAttribute('data-content', popStr);
+  $('#popcart').popover('show');
+}
+
+
+
+function clearCart() {
+  cart = JSON.parse(localStorage.getItem('cart'));
+  for (var item in cart) {
+      document.getElementById('div' + item).innerHTML = '<button id="' + item + '" class="btn btn-primary cart">Add To Cart</button>'
+  }
+  localStorage.clear();
+  cart = {};
+  updateCart(cart);
+}
+
+
+
+
+{% comment %} function updateCart(cart) {
+  var sum = 0;
+  for (var item in cart) {
+    sum = sum + cart[item][0]; // no of item show in navcart'(0)'
+    document.getElementById('div' + item).innerHTML = "<button id='minus" + item + "' class='btn btn-primary minus'>-</button> <span id='val" + item + "''>" + cart[item][0] + "</span> <button id='plus" + item + "' class='btn btn-primary plus'> + </button>";
+  }
+  localStorage.setItem('cart', JSON.stringify(cart));
+  document.getElementById('cart').innerHTML = sum;
+  //console.log(cart);
+  updatePopver(cart);
+} {% endcomment %}
+
+
+// If plus or minus button is clicked, change the cart as well as the display value
+{% comment %} $('.divit').on("click", "button.minus", function() {
+    a = this.id.slice(7, );
+    cart['it' + a][0] = cart['it' + a][0] - 1;
+    cart['it' + a][0] = Math.max(0, cart['it' + a][0]);
+    //document.getElementById('valit' + a).innerHTML = cart['it' + a][0];
+    if (cart['it' + a][0] == 0){
+      document.getElementById('divit' + a).innerHTML = '<button id="it'+a+'" class="btn btn-primary cart">Add to Cart</button>';
+        delete cart['it'+a];
+    }else{
+      document.getElementById('valit'+a).innerHTML = cart['it'+a][0];
+    }
+    updateCart(cart);
+});
+$('.divit').on("click", "button.plus", function() {
+    a = this.id.slice(6, );
+    cart['it' + a][0] = cart['it' + a][0] + 1;
+    document.getElementById('valit' + a).innerHTML = cart['it' + a][0];
+    updateCart(cart);
+}); {% endcomment %}
+
+
+</script>
+
+{% endblock %}
