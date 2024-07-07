@@ -11,7 +11,7 @@
             <th>Image</th>
             <th>Item Group</th>
             <th>Item Description</th>
-            <th>Stock Quantity</th>
+            {% comment %} <th>Stock Quantity</th> {% endcomment %}
             <th>Item Rate</th>
             <th>Action</th>
         </tr>
@@ -34,14 +34,18 @@
         <td>{{i.item_group}}</td>
         
         <td><h5 class="card-title" id="nameitem{{i.id}}">{{i.item_desc}}</h5></td>
-        <td>{{i.stock_qty}}</td>
+        {% comment %} <td>{{i.stock_qty}}</td> {% endcomment %}
         <td><span id="priceitem{{i.id}}">{{i.item_rate}}</span></td>
-        <td><span id="divitem{{i.id}}" class="divit">
-            <button id="item{{i.id}}" value="{{i.id}}-{{usr}}" class="btn btn-primary cart">Add to Cart</button>
-            </span></td>
+        {% comment %} <td><span id="divitem{{i.id}}" class="divit"> {% endcomment %}
+            {% comment %} <button id="item{{i.id}}" value="{{i.id}}-{{usr}}" data-action="add" class="btn btn-primary add-btn update-cart">Add to Cart</button> {% endcomment %}
+           <td> <button data-product="{{i.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart"> Add to Ccart </button>
+          {% comment %} <td> <button class="update-cart" data-id="{{i.id}}" data-action="add">Add to Cart</button>   {% endcomment %}
+          </span></td>
+            {% comment %} <td><a href="/delete-receipe/{{i.id}}-{{usr}}/" class="btn btn-danger">Delete</a></td>   {% endcomment %}
     </tr>
+  </tbody>
 
-    <button id="invisible" value="{{cart_data}}" class="btn btn-primary cart"></button>
+    {% comment %} <button id="invisible" value="{{cart_data}}" class="btn btn-primary cart"></button> {% endcomment %}
 
 {%endfor%}
 
@@ -51,7 +55,91 @@
  
 <script>
 
+  var user = '{{request.user}}'
 
+  function getToken(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+var csrftoken = getToken('csrftoken');
+
+
+
+var updateBtns = document.getElementsByClassName('update-cart');
+
+for (var i = 0; i < updateBtns.length; i++){
+  updateBtns[i].addEventListener('click', function(){ 
+    var productId = this.dataset.product;
+    var action = this.dataset.action;
+    console.log('productId:', productId, 'action:', action);
+
+    //var user = this.dataset.usr;
+    //var user = '{{request.user}}'
+
+    /*function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              var cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }*/
+  //var csrftoken = getCookie('csrftoken');
+
+    console.log('USER:', user )  
+    if (user == 'AnonymousUser'){
+      console.log('User is not authenticated')
+    }else{
+      updateUserOrder(productId, action)
+    }
+
+  });
+}
+
+
+
+
+function updateUserOrder(productId, action){
+    var url = '/update_item/'
+    console.log('URL:', url)
+    fetch(url, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'X-CSRFToken':csrftoken ,
+      },
+      body:JSON.stringify({'productId': productId, 'action':action})
+    })
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      console.log('data:', data)
+    });
+  }
+
+
+
+/**
 
   {% comment %} console.log('working'); {% endcomment %}
 // Find out the cart items from localStorage
@@ -67,20 +155,25 @@ function add_to_cart_db(value){
   //console.log(this.value);
 
   arr = value.split('-')
+  //item_id = arr[0];
+  //user_id = arr[1];
 
   console.log(arr)
   fetch(`${window.location.origin}/add-to-cart?item_id=${arr[0]}&user_id=${arr[1]}`, {
+  //fetch(`${window.location.origin}/add-to-cart?item_id=${item_id}&user_id=${user_id}`, {
+
     method: "GET",
     })
     
   .then(response => {
     if (!response.ok) {
       throw new Error('Network response was not ok');
-    }
+    } 
     return response.json();
   })
   .then(data => {
-    console.log("AAA")
+    //console.log("AAA",data)
+    console.log("Item added to cart:", data);
     // Display data in an HTML element
     //outputElement.textContent = JSON.stringify(data, null, 2);
   })
@@ -89,6 +182,17 @@ function add_to_cart_db(value){
   });
 
 }; 
+
+
+
+
+
+
+// Example usage:
+//delete_from_cart(`${arr[0]}`, `${arr[1]}`); // Replace with actual item_id and user_id
+
+
+
 
 // If the add to cart button is clicked, add/increment the item
 
@@ -160,8 +264,36 @@ function updateCart(cart) {
 }
 
 
+function delete_from_cart(item_id, user_id) {
+
+  arr = value.split('-')
+  console.log(arr)
+  fetch(`${window.location.origin}/delete-from-cart?item_id=${arr[0]}&user_id=${arr[1]}`, {
+    method: 'DELETE',
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("Item deleted from cart:", data);
+    // Optionally update the UI or handle success
+  })
+  .catch(error => {
+    console.error('Error deleting item from cart:', error);
+  });
+};
+arr = value.split('-')
+console.log(arr)
+delete_from_cart(`${arr[0]}`, `${arr[1]}`); // Replace with actual item_id and user_id
+
+
 // If plus or minus button is clicked, change the cart as well as the display value
 $('.divit').on("click", "button.minus", function() {
+  
+    delete_from_cart(this.value)
     a = this.id.slice(7, );
     cart['it' + a][0] = cart['it' + a][0] - 1;
     cart['it' + a][0] = Math.max(0, cart['it' + a][0]);
@@ -175,12 +307,14 @@ $('.divit').on("click", "button.minus", function() {
     updateCart(cart);
 });
 $('.divit').on("click", "button.plus", function() {
+    
     a = this.id.slice(6, );
     cart['it' + a][0] = cart['it' + a][0] + 1;
     document.getElementById('valit' + a).innerHTML = cart['it' + a][0];
     updateCart(cart);
 });
 
+**/
 
 </script>
 

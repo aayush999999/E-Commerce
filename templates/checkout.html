@@ -7,21 +7,10 @@
 
 <div class="container">
     <div class="col my-4">
-        <h2>Step 1 - E-Commerce Express Checkout - Review Your Cart Items</h2>
+        <h2>Step 1 - E-Commerce Express Checkout - Review Your Items</h2>
         <div class="my-4">
             <ul class="list-group"  id="items">
-                {% comment %} <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Cras justo odio
-                    <span class="badge badge-primary badge-pill">14</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Dapibus ac facilisis in
-                    <span class="badge badge-primary badge-pill">2</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Morbi leo risus
-                    <span class="badge badge-primary badge-pill">1</span>
-                </li> {% endcomment %}
+                
             </ul>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mt-3">
@@ -78,6 +67,7 @@
 {% block js %} 
 
 <script>
+/*
     // Find out the cart items from localStorage
 if (localStorage.getItem('cart') == null) {
     var cart = {};
@@ -119,7 +109,7 @@ document.location="/";
 {%endif%}
 
 $('#amount').val($('#totalPrice').html())// to save amount in CHECKOUT FORM
-
+*/
 </script>
 
 {% endblock %}

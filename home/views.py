@@ -5,19 +5,10 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import HttpResponse
-
 from django.contrib.auth import authenticate, login, logout
-# from django.contrib.auth.decorators import login_required
-
-
-
-
-
-# from home.models import Registration,ItemInsert,Contact,Checkout,OrderUpdate,Blogpost
-# import json
-
-# from django.db.models import Q
-
+import json
+from django.db.models import Q
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -114,32 +105,52 @@ def search(request):
     return render(request, 'practice.html', params)
 
 
-def add_to_cart(request):
-    print("AAAAA")
-    print(request.GET)
-    # return HttpResponse('{"status":"added"}')
-    if request.method == "GET":
+# def add_to_cart(request):
+#     print("AAAAA")
+#     print(request.GET)
+#     # return HttpResponse('{"status":"added"}')
+#     if request.method == "GET":
 
-        data = request.GET
-        item_insert_id = data.get('item_id')
-        user_id = data.get('user_id')
-        usr = User.objects.get(id=user_id)
+#         data = request.GET
+#         item_insert_id = data.get('item_id')
+#         user_id = data.get('user_id')
+#         usr = User.objects.get(id=user_id)
 
-        cart = Cart.objects.filter(user=usr, product=ItemInsert.objects.get(id=item_insert_id))
-        if  cart.exists():
-            cart = cart.first()
-            cart.quantity +=1
-            cart.save()
-        else:
-            Cart.objects.create(user=usr, product=ItemInsert.objects.get(id=item_insert_id), quantity=1)
-    return HttpResponse('{"status":"added"}')
+#         cart = Cart.objects.filter(user=usr, product=ItemInsert.objects.get(id=item_insert_id))
+#         if  cart.exists():
+#             cart = cart.first()
+#             cart.quantity =+1
+#             cart.save()
+#         else:
+#             Cart.objects.create(user=usr, product=ItemInsert.objects.get(id=item_insert_id), quantity=+1)
+#     return HttpResponse('{"status":"added"}')
 
 
 
 
 #    CART VIEW
 def cart(request):
-    return render(request, 'homepage.html')
+    
+    # # if request.User.is_authenticated:
+    #     customer = request.user.customer
+    #     order, created = Order.objects.get_or_create(customer=customer)
+    #     items = order.orderitem_set.all()
+    # else:
+    #     items = []
+    #     order = {'get_cart_total':0, 'get_cart_items':0}
+
+    # context = {'items': items, 'order':order}
+    return render(request, 'cart.html', )#context)
+
+
+def updateItem(request):
+    data = json.loads(request.body)
+    productId = data['productId']
+    action = data['action']
+
+    print('Action:', action)
+    print('productId:', productId)
+    return JsonResponse('Item was added', safe=False)
 
 
 def practice(request):
@@ -147,12 +158,18 @@ def practice(request):
 
     query = request.GET.get('search')
     if query:
-        item = ItemInsert.objects.filter(Q(item_group=query) | Q(item_desc=query) )
+        item = ItemInsert.objects.filter(Q(item_group__icontains=query) | Q(item_desc__icontains=query) )
 
-    print(request.user)
-    cart_data =  list(Cart.objects.filter(user=request.user).values("product__item_desc", "product__item_rate", 'quantity'))
-    print(cart_data)
-    return render(request, 'practice.html',{'item':item, "usr": request.user.id, 'cart_data': cart_data})
+    # print(request.user)
+    # cart_data =  list(Cart.objects.filter(user=request.user).values("product__item_desc", "product__item_rate", 'quantity'))
+    # print(cart_data)
+    return render(request, 'practice.html',{'item':item, "usr": request.user.id})
+
+
+# def delete_receipe(request, id):
+#     queryset =  .objects.get(id=id)
+#     queryset.delete()
+#     return redirect('details')
 
 
 def tracker(request):
